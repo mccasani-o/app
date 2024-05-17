@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ClienteServiceImplTest {
@@ -34,17 +34,25 @@ class ClienteServiceImplTest {
     private ClienteServiceImpl clienteService;
 
     private ClienteEntity clienteEntity;
+    private ClienteRequest clienteRequest;
 
 
     @BeforeEach
     void setUp() {
-         clienteEntity = ClienteEntity.builder()
-                 .codigo("01")
+        clienteEntity = ClienteEntity.builder()
+                .codigo("01")
                 .nombres("Mauricio")
                 .apellidos("Ccasani")
                 .tipoDocumento("DNI")
                 .numeroDocumento("0986546")
                 .fechaCreacion(LocalDateTime.now())
+                .build();
+
+        clienteRequest = ClienteRequest.builder()
+                .nombres("Mauricio")
+                .apellidos("Ccasani")
+                .tipoDocumento("DNI")
+                .numeroDocumento("0986546")
                 .build();
 
     }
@@ -61,17 +69,11 @@ class ClienteServiceImplTest {
 
     @Test
     void crearCliente() {
-        ClienteRequest clienteRequest=   ClienteRequest.builder()
-                .nombres("Mauricio")
-                .apellidos("Ccasani")
-                .tipoDocumento("DNI")
-                .numeroDocumento("0986546")
-                .build();
+
 
         given(this.clienteRepository.save(any())).willReturn(this.clienteEntity);
 
-
-        ClienteCreadoResponse clienteCreadoResponse=this.clienteService.crearCliente(clienteRequest);
+        ClienteCreadoResponse clienteCreadoResponse = this.clienteService.crearCliente(this.clienteRequest);
         assertThat(clienteCreadoResponse).isNotNull();
         assertThat(clienteCreadoResponse.getMensaje()).isEqualTo("Cliente creado");
 
@@ -90,7 +92,25 @@ class ClienteServiceImplTest {
 
     @Test
     void idNoEncontradoTest() {
-        given(this.clienteRepository.findById(any())).willReturn(Optional.empty());
-        Assertions.assertThrows(CustomException.class, ()->this.clienteService.buscarXcodigo("0023"));
+        CustomException exception = new CustomException("000", "Id no encontrado", HttpStatus.NOT_FOUND);
+
+        Assertions.assertThrows(CustomException.class, () -> this.clienteService.buscarXcodigo("0023"));
+
+        assertEquals("000", exception.getCode());
+        assertEquals("Id no encontrado", exception.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
+    }
+
+    @Test
+    void tipoDocumentoNoValidoTest() {
+        CustomException exception = new CustomException("000", "Tipo documento no valido", HttpStatus.BAD_REQUEST);
+        this.clienteRequest.setTipoDocumento("DNit");
+
+        Assertions.assertThrows(CustomException.class,
+                () -> this.clienteService.crearCliente(this.clienteRequest));
+
+        assertEquals("000", exception.getCode());
+        assertEquals("Tipo documento no valido", exception.getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
     }
 }

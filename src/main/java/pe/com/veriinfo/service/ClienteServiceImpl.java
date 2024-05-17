@@ -4,17 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import pe.com.veriinfo.entity.ClienteEntity;
-import pe.com.veriinfo.model.ClienteCreadoResponse;
-import pe.com.veriinfo.model.ClienteRequest;
-import pe.com.veriinfo.model.ClienteResponse;
-import pe.com.veriinfo.model.CustomException;
+import pe.com.veriinfo.model.*;
 import pe.com.veriinfo.repository.ClienteRepository;
 
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -33,6 +27,11 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     public ClienteCreadoResponse crearCliente(ClienteRequest clienteRequest) {
+
+        if (Objects.isNull(TipoDocumentoEnum.buscarXtipo(clienteRequest.getTipoDocumento()))){
+            throw new CustomException("0002","Tipo documento no valido",HttpStatus.BAD_REQUEST);
+        }
+
         this.clienteRepository.save(this.toClienteEntity(clienteRequest));
         return ClienteCreadoResponse.builder()
                 .mensaje("Cliente creado")
