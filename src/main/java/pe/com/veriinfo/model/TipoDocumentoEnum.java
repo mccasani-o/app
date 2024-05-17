@@ -3,10 +3,11 @@ package pe.com.veriinfo.model;
 import java.util.Arrays;
 
 public enum TipoDocumentoEnum {
-
+    // @formatter:off
     DNI("DNI","LIBRETA ELECTORAL O DNI"),
-    PASPORTE("PASAPORTE","PASAPORTE"),
+    PASAPORTE("PASAPORTE","PASAPORTE"),
     RUC("CE", "CARNET DE EXTRANJERIA");
+    // @@formatter:on
 
     private String tipo;
     private String descripcion;
@@ -24,7 +25,7 @@ public enum TipoDocumentoEnum {
         return descripcion;
     }
 
-    public static TipoDocumentoEnum buscarXtipo(String  tipo){
-        return Arrays.stream(values()).filter(t->t.getTipo().equalsIgnoreCase(tipo)).findAny().orElse(null);
+    public static TipoDocumentoEnum buscarXtipo(String tipo) {
+        return Arrays.stream(values()).filter(t -> t.getTipo().equalsIgnoreCase(tipo)).findAny().orElse(null);
     }
 }
